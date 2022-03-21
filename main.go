@@ -24,7 +24,18 @@ var (
 )
 
 var (
-	removeVPNOutput = []string{"[1m", "[0m", "[4mName", "[4mRemote IP", "[4mVirtual IP", "[4mBytes Received", "[4mBytes Sent", "[4mLast Seen"}
+	removeVPNOutput = []string{
+		"[1m",
+		"[0m",
+		"[4mName",
+		"[4mLast Seen",
+		"[4mRemote IP",
+		"[4mBytes Sent",
+		"[4mVirtual IP",
+		"[4mBytes Received",
+		"::: Connected Clients List :::",
+		"::: Disabled clients :::",
+	}
 )
 
 func main() {
@@ -116,8 +127,7 @@ func main() {
 				log.Println(err)
 				msg.Text = "Oops!"
 			} else {
-				res := strings.Replace(outb.String(), "::: Connected Clients List :::", "", -1)
-				res = strings.Replace(res, "::: Disabled clients :::", "", -1)
+				res := outb.String()
 
 				for _, str := range removeVPNOutput {
 					res = strings.Replace(res, str, "", -1)

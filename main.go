@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -16,7 +17,7 @@ const (
 var (
 	cpuCommand  = []string{"-c", `top -bn2 | grep '%Cpu' | tail -1 | grep -P '(....|...) id,'| awk '{print "CPU usage: " 100-$8 "%"}'`}
 	memCommand  = []string{"-c", `top -bn2 | grep 'MiB Mem' | tail -1 | awk '{printf "Memory usage: %s total; %s free; %s used\n",$4,$6,$8}'`}
-	diskCommand = []string{"-c", "df", "-h"}
+	diskCommand = []string{"df", "-h"}
 )
 
 func main() {
@@ -34,12 +35,21 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
+	userID, err := strconv.ParseInt(os.Getenv("USER_ID"), 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for update := range updates {
 		if update.Message == nil {
 			continue
 		}
 
 		if !update.Message.IsCommand() {
+			continue
+		}
+
+		if update.SentFrom().ID != userID {
 			continue
 		}
 
@@ -69,7 +79,7 @@ func main() {
 				msg.Text = outb.String()
 			}
 		case "disk":
-			cmd := exec.Command(bashCommand, diskCommand...)
+			cmd := exec.Command(diskCommand[0], diskCommand[1])
 			var outb bytes.Buffer
 			cmd.Stdout = &outb
 

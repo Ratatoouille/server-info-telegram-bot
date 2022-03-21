@@ -15,9 +15,10 @@ const (
 )
 
 var (
-	cpuCommand  = []string{"-c", `top -bn2 | grep '%Cpu' | tail -1 | grep -P '(....|...) id,'| awk '{print "CPU usage: " 100-$8 "%"}'`}
-	memCommand  = []string{"-c", `top -bn2 | grep 'MiB Mem' | tail -1 | awk '{printf "Memory usage: %s total; %s free; %s used\n",$4,$6,$8}'`}
-	diskCommand = []string{"df", "-h"}
+	cpuCommand    = []string{"-c", `top -bn2 | grep '%Cpu' | tail -1 | grep -P '(....|...) id,'| awk '{print "CPU usage: " 100-$8 "%"}'`}
+	memCommand    = []string{"-c", `top -bn2 | grep 'MiB Mem' | tail -1 | awk '{printf "Memory usage: %s total; %s free; %s used\n",$4,$6,$8}'`}
+	diskCommand   = []string{"df", "-h"}
+	uptimeCommand = "uptime"
 )
 
 func main() {
@@ -80,6 +81,17 @@ func main() {
 			}
 		case "disk":
 			cmd := exec.Command(diskCommand[0], diskCommand[1])
+			var outb bytes.Buffer
+			cmd.Stdout = &outb
+
+			if err := cmd.Run(); err != nil {
+				log.Println(err)
+				msg.Text = "Oops!"
+			} else {
+				msg.Text = outb.String()
+			}
+		case "uptime":
+			cmd := exec.Command(uptimeCommand)
 			var outb bytes.Buffer
 			cmd.Stdout = &outb
 

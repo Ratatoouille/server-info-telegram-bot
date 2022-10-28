@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -21,6 +22,7 @@ var (
 	diskCommand   = []string{"df", "-h"}
 	uptimeCommand = "uptime"
 	vpn           = "pivpn"
+	reboot        = "reboot"
 )
 
 var (
@@ -132,8 +134,19 @@ func main() {
 				for _, str := range removeVPNOutput {
 					res = strings.Replace(res, str, "", -1)
 				}
-				msg.Text = res
+				msg.ParseMode = tgbotapi.ModeMarkdownV2
+				msg.Text = fmt.Sprintf("```%v```", res)
 			}
+		case "reboot":
+			cmd := exec.Command(reboot)
+			var outb bytes.Buffer
+			cmd.Stdout = &outb
+
+			if err := cmd.Run(); err != nil {
+				log.Println(err)
+				msg.Text = "Oops!"
+			}
+
 		default:
 			msg.Text = "Oops!"
 		}
